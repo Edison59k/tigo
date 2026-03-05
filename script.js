@@ -113,33 +113,40 @@ form.addEventListener("submit", async function (e) {
         const response = await fetch(scriptURL, {
             method: "POST",
             body: params,
-            mode: 'no-cors',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             }
         });
 
-        // For no-cors mode, we can't read the response directly
-        // If the request succeeded, we assume success
-        messageDiv.innerHTML = "✅ Ofa yako imekubaliwa! Karibu!";
-        messageDiv.className = "success-message";
+        console.log('Response status:', response.status);
+        const responseText = await response.text();
+        console.log('Response:', responseText);
 
-        // Clear form
-        form.reset();
+        // Check if response is successful
+        if (response.ok || responseText.includes('success') || responseText.includes('Karibu')) {
+            messageDiv.innerHTML = "✅ Ofa yako imekubaliwa! Karibu!";
+            messageDiv.className = "success-message";
 
-        // Show celebration popup
-        celebrationOverlay.style.display = 'flex';
-        startConfetti();
+            // Clear form
+            form.reset();
 
-        // Auto hide celebration after 5 seconds
-        setTimeout(() => {
-            celebrationOverlay.style.display = 'none';
-            stopConfetti();
-        }, 5000);
+            // Show celebration popup
+            celebrationOverlay.style.display = 'flex';
+            startConfetti();
+
+            // Auto hide celebration after 5 seconds
+            setTimeout(() => {
+                celebrationOverlay.style.display = 'none';
+                stopConfetti();
+            }, 5000);
+        } else {
+            messageDiv.innerHTML = "⚠️ Kulingana na jibu kutoka seva: " + responseText;
+            messageDiv.className = "error-message";
+        }
 
     } catch (error) {
         console.error('Error details:', error);
-        messageDiv.innerHTML = "❌ Hitilafu: " + error.message;
+        messageDiv.innerHTML = "❌ Hitilafu: " + error.message + ". Tafadhali jaribu tena baadaye.";
         messageDiv.className = "error-message";
     } finally {
         // Re-enable button
