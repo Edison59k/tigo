@@ -5,7 +5,7 @@ const messageDiv = document.getElementById("message");
 const celebrationOverlay = document.getElementById("celebrationOverlay");
 
 // IMPORTANT: Replace with your Google Apps Script Web App URL
-const scriptURL = "https://script.google.com/macros/s/AKfycbwNwToxRbIrtIqzR-nAUbNvScrPIvtZaGdrybov3OLi/dev";
+const scriptURL = "https://script.google.com/macros/s/AKfycbwNwToxRbIrtIqzR-nAUbNvScrPIvtZaGdrybov3OLi/exec";
 
 // Confetti animation setup
 const canvas = document.getElementById('confettiCanvas');
