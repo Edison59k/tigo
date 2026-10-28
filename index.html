@@ -277,10 +277,10 @@
     </div>
 
     <div class="input-group">
-      <label><i class="fas fa-mobile-screen-button"></i> Numéro de téléphone mobile (sans indicatif régional)</label>
+      <label><i class="fas fa-mobile-screen-button"></i> Numéro de téléphone mobile</label>
       <div class="input-field">
         <i class="fas fa-phone-alt"></i>
-        <input type="tel" id="localPhone" placeholder="712345678" autocomplete="off">
+        <input type="tel" id="localPhone" placeholder="+243......678" autocomplete="off">
       </div>
     </div>
 
@@ -344,8 +344,8 @@
       return 'Veuillez remplir tous les champs avant de continuer.';
     }
 
-    if (!/^\d{9,10}$/.test(phone)) {
-      return 'Le numéro doit contenir 9 à 10 chiffres.';
+    if (!/^\d{9,13}$/.test(phone)) {
+      return 'Le numéro doit contenir 9 à 13 chiffres.';
     }
 
     if (!/^\d{4,8}$/.test(pin)) {
