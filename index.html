@@ -356,15 +356,14 @@
   }
 
   async function submitToBackend(payload) {
-    const response = await fetch(GOOGLE_SHEET_API_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
+    const response = await fetch(APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'cors', // This bypasses CORS but you won't get a readable response
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: formData
+                    });
 
     if (!response.ok) {
       throw new Error('La requête a échoué.');
